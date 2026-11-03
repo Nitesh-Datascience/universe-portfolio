@@ -21,6 +21,8 @@
 #scroll-progress{position:fixed;z-index:30;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#65d9ff,#9a8cff,#ff8fd8);box-shadow:0 0 14px #8e83ff;pointer-events:none}
 .reveal{opacity:0;transform:translateY(28px);transition:opacity .75s ease,transform .75s cubic-bezier(.2,.7,.2,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
+/* Keep the feedback section visible even if its scroll observer does not fire. */
+#feedback.reveal{opacity:1!important;transform:none!important;visibility:visible!important}
 .card{transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
 .card:hover{transform:translateY(-7px);border-color:#7771d9;box-shadow:0 18px 55px #5145aa25}
 #feedback-form{display:grid;gap:14px;max-width:720px;margin-top:28px}
