@@ -144,78 +144,7 @@ document.querySelectorAll('.section').forEach(el=>{el.classList.add('reveal');re
 let chosenRating=0;document.querySelectorAll('.rating button').forEach(btn=>btn.addEventListener('click',()=>{chosenRating=Number(btn.dataset.rating);document.querySelectorAll('.rating button').forEach(b=>b.classList.toggle('active',Number(b.dataset.rating)<=chosenRating))}));
 document.querySelector('#feedback-form').addEventListener('submit',e=>{e.preventDefault();const name=document.querySelector('#fb-name').value.trim(),email=document.querySelector('#fb-email').value.trim(),kind=document.querySelector('#fb-type').value,msg=document.querySelector('#fb-message').value.trim();const subject=encodeURIComponent('Portfolio feedback — '+kind);const body=encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nRating: '+(chosenRating||'Not rated')+'/5\nType: '+kind+'\n\nFeedback:\n'+msg);document.querySelector('#feedback-note').textContent='Opening your email app with the feedback draft…';location.href='mailto:ns0762005@gmail.com?subject='+subject+'&body='+body});
 
-const username='Nitesh-Datascience';const demos={'care-transition-efficiency-analytics':'https://care-transition-efficiency-analytics-knfy8ljtaxyn8ti74zy5ng.streamlit.app/','Customer_churn_Prediction':'https://customerchurnprediction-fkpbjib3muyvrhmgchkurb.streamlit.app/','EduPro_Project':'https://eduproproject-jkoe6q6tctk5xafa6ggogf.streamlit.app/','Financial_Fraud_Detection':'https://financialfrauddetection-6geni2xkrt3dc8ry2infsf.streamlit.app/'};const featured=['EduPro_Project','Customer_churn_Prediction','Financial_Fraud_Detection','care-transition-efficiency-analytics','FORESIGHT_NorthBay_Project','Nitesh-Tree-Portfolio','3D-Sketch-Portfolio','CodeVenjar','Happy-Diwali'];async function loadGitHubData(){
- const status=document.querySelector('#status'),button=document.querySelector('#refresh-github');
- const metricIds=['repos','followers','following','stars'];
- const setMetric=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
- const starList=document.querySelector('#repo-star-list');
- const projectGrid=document.querySelector('#project-grid');
- const fmt=value=>Number(value||0).toLocaleString('en-IN');
- const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- const showFailure=message=>{
-   metricIds.forEach(id=>{if(document.getElementById(id)?.textContent==='—')setMetric(id,'—')});
-   if(starList)starList.innerHTML='<article class="card"><h3>Repository ranking unavailable</h3><p>'+escapeHTML(message)+'</p><div class="links"><a href="https://github.com/'+username+'?tab=repositories" target="_blank" rel="noreferrer">Browse all public repositories ↗</a></div></article>';
-   if(status)status.textContent='GitHub connection issue · '+message;
- };
- if(status)status.textContent='Connecting to GitHub…';
- if(button){button.disabled=true;button.textContent='↻ Loading…'}
- if(starList)starList.innerHTML='<article class="card"><p>Fetching live repository data from GitHub…</p></article>';
- try{
-   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),18000);
-   const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
-   const getJSON=async url=>{
-     const response=await fetch(url,{headers,cache:'no-store',signal:controller.signal});
-     if(!response.ok){
-       let detail='HTTP '+response.status;
-       try{const body=await response.json();if(body.message)detail=body.message+' (HTTP '+response.status+')'}catch(_){}
-       throw new Error(detail);
-     }
-     return response.json();
-   };
-   let user;
-   try{
-     user=await getJSON('https://api.github.com/users/'+username);
-     setMetric('repos',fmt(user.public_repos));
-     setMetric('followers',fmt(user.followers));
-     setMetric('following',fmt(user.following));
-   }catch(profileError){throw new Error('Profile stats: '+profileError.message)}
-   let repos=[];
-   try{
-     let page=1;
-     while(page<=10){
-       const batch=await getJSON('https://api.github.com/users/'+username+'/repos?per_page=100&page='+page+'&sort=updated');
-       if(!Array.isArray(batch))throw new Error('Unexpected repository response from GitHub.');
-       repos=repos.concat(batch);
-       if(batch.length<100)break;
-       page++;
-     }
-   }catch(repoError){
-     setMetric('stars','—');
-     if(status)status.textContent='Profile stats loaded; repository data failed: '+repoError.message;
-     if(starList)starList.innerHTML='<article class="card"><h3>Repository list could not load</h3><p>'+escapeHTML(repoError.message)+'</p><a href="https://github.com/'+username+'?tab=repositories" target="_blank" rel="noreferrer">Open public repositories ↗</a></article>';
-     throw new Error('Repository data: '+repoError.message);
-   }finally{clearTimeout(timeout)}
-   const totalStars=repos.reduce((sum,repo)=>sum+Number(repo.stargazers_count||0),0);
-   setMetric('stars',fmt(totalStars));
-   const topStarred=[...repos].sort((a,b)=>Number(b.stargazers_count||0)-Number(a.stargazers_count||0)||a.name.localeCompare(b.name)).slice(0,5);
-   if(starList)starList.innerHTML=topStarred.map((repo,index)=>'<article class="card repo-rank-card"><span class="tag">#'+(index+1)+' MOST STARRED</span><h3>'+escapeHTML(repo.name.replaceAll('-',' ').replaceAll('_',' '))+'</h3><p>'+escapeHTML(repo.description||'Public GitHub repository')+'</p><strong class="repo-star-count">★ '+fmt(repo.stargazers_count)+' stars</strong><div class="links"><a href="'+escapeHTML(repo.html_url)+'" target="_blank" rel="noreferrer">View repository ↗</a></div></article>').join('')||'<article class="card"><p>No public repositories were returned by GitHub.</p></article>';
-   const byName=new Map(repos.map(repo=>[repo.name,repo]));
-   const selected=featured.map(name=>byName.get(name)).filter(Boolean);
-   const extras=repos.filter(repo=>!featured.includes(repo.name)).slice(0,3);
-   const cards=[...selected,...extras].slice(0,12);
-   if(projectGrid)projectGrid.innerHTML=cards.map(repo=>{
-     const demo=demos[repo.name];
-     return '<article class="card"><h3>'+escapeHTML(repo.name.replaceAll('-',' ').replaceAll('_',' '))+'</h3><p>'+escapeHTML(repo.description||'A project from my GitHub portfolio.')+'</p><span class="tag">'+escapeHTML(repo.language||'Project')+'</span><span class="tag">★ '+fmt(repo.stargazers_count)+'</span><div class="links"><a href="'+escapeHTML(repo.html_url)+'" target="_blank" rel="noreferrer">Source code ↗</a>'+(demo?'<a href="'+escapeHTML(demo)+'" target="_blank" rel="noreferrer">Live demo ↗</a>':'')+'</div></article>';
-   }).join('')||'<article class="card"><p>No public repositories found.</p></article>';
-   if(status)status.textContent='✓ GitHub data loaded successfully · '+repos.length+' public repositories checked · Updated '+new Date().toLocaleString('en-IN');
- }catch(error){
-   const message=error.name==='AbortError'?'GitHub request timed out. Please try again.':error.message;
-   showFailure(message);
-   console.error('CODLYTIC GitHub stats:',error);
- }finally{
-   if(button){button.disabled=false;button.textContent='↻ Refresh GitHub stats'}
- }
-}document.querySelector('#refresh-github')?.addEventListener('click',loadGitHubData);loadGitHubData();
+const username='Nitesh-Datascience';const demos={'care-transition-efficiency-analytics':'https://care-transition-efficiency-analytics-knfy8ljtaxyn8ti74zy5ng.streamlit.app/','Customer_churn_Prediction':'https://customerchurnprediction-fkpbjib3muyvrhmgchkurb.streamlit.app/','EduPro_Project':'https://eduproproject-jkoe6q6tctk5xafa6ggogf.streamlit.app/','Financial_Fraud_Detection':'https://financialfrauddetection-6geni2xkrt3dc8ry2infsf.streamlit.app/'};const featured=['EduPro_Project','Customer_churn_Prediction','Financial_Fraud_Detection','care-transition-efficiency-analytics','FORESIGHT_NorthBay_Project','Nitesh-Tree-Portfolio','3D-Sketch-Portfolio','CodeVenjar','Happy-Diwali'];
 /* Premium interactions */
 const topbar=document.querySelector('.top'),backTop=document.createElement('button');
 backTop.id='back-top';backTop.type='button';backTop.setAttribute('aria-label','Back to top');backTop.textContent='↑';document.body.appendChild(backTop);
@@ -255,4 +184,47 @@ document.querySelectorAll('.fallback-planet').forEach(button=>button.addEventLis
  items.forEach(item=>item.addEventListener('click',()=>{const target=document.getElementById(item.dataset.go);closePalette();if(target)target.scrollIntoView({behavior:'smooth',block:'start'})}));
  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette()}if(e.key==='Escape'&&backdrop.classList.contains('open'))closePalette()});
 })();
-</script></body></html>
+</script><script>
+/* GitHub Signal runs independently from the optional Three.js module. */
+(function(){
+ const username='Nitesh-Datascience';
+ const demos={'care-transition-efficiency-analytics':'https://care-transition-efficiency-analytics-knfy8ljtaxyn8ti74zy5ng.streamlit.app/','Customer_churn_Prediction':'https://customerchurnprediction-fkpbjib3muyvrhmgchkurb.streamlit.app/','EduPro_Project':'https://eduproproject-jkoe6q6tctk5xafa6ggogf.streamlit.app/','Financial_Fraud_Detection':'https://financialfrauddetection-6geni2xkrt3dc8ry2infsf.streamlit.app/'};
+ const featured=['EduPro_Project','Customer_churn_Prediction','Financial_Fraud_Detection','care-transition-efficiency-analytics','FORESIGHT_NorthBay_Project','Nitesh-Tree-Portfolio','3D-Sketch-Portfolio','CodeVenjar','Happy-Diwali'];
+ const $=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-IN');
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ async function load(){
+  const status=$('#status'),button=$('#refresh-github'),ranking=$('#repo-star-list'),projects=$('#project-grid');
+  const metric=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+  if(button){button.disabled=true;button.textContent='↻ Loading…'}
+  if(status)status.textContent='Connecting directly to GitHub…';
+  if(ranking)ranking.innerHTML='<article class="card"><p>Fetching repository data…</p></article>';
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  const get=async url=>{const r=await fetch(url,{headers:{Accept:'application/vnd.github+json'},cache:'no-store',signal:controller.signal});if(!r.ok){let msg='HTTP '+r.status;try{const j=await r.json();msg=j.message||msg}catch(_){}throw Error(msg)}return r.json()};
+  try{
+   const [user,repos]=await Promise.all([
+    get('https://api.github.com/users/'+username),
+    get('https://api.github.com/users/'+username+'/repos?per_page=100&sort=updated')
+   ]);
+   metric('repos',fmt(user.public_repos));metric('followers',fmt(user.followers));metric('following',fmt(user.following));
+   if(!Array.isArray(repos))throw Error('GitHub returned an unexpected repository response.');
+   metric('stars',fmt(repos.reduce((sum,r)=>sum+Number(r.stargazers_count||0),0)));
+   const top=[...repos].sort((a,b)=>(b.stargazers_count||0)-(a.stargazers_count||0)||a.name.localeCompare(b.name)).slice(0,5);
+   if(ranking)ranking.innerHTML=top.length?top.map((r,i)=>'<article class="card repo-rank-card"><span class="tag">#'+(i+1)+' MOST STARRED</span><h3>'+esc(r.name.replace(/[-_]/g,' '))+'</h3><p>'+esc(r.description||'Public GitHub repository')+'</p><strong class="repo-star-count">★ '+fmt(r.stargazers_count)+' stars</strong><div class="links"><a href="'+esc(r.html_url)+'" target="_blank" rel="noreferrer">View repository ↗</a></div></article>').join(''):'<article class="card"><p>No public repositories found.</p></article>';
+   const byName=new Map(repos.map(r=>[r.name,r])),chosen=featured.map(n=>byName.get(n)).filter(Boolean),extra=repos.filter(r=>!featured.includes(r.name)).slice(0,3),cards=[...chosen,...extra].slice(0,12);
+   if(projects)projects.innerHTML=cards.map(r=>'<article class="card"><h3>'+esc(r.name.replace(/[-_]/g,' '))+'</h3><p>'+esc(r.description||'A project from my GitHub portfolio.')+'</p><span class="tag">'+esc(r.language||'Project')+'</span><span class="tag">★ '+fmt(r.stargazers_count)+'</span><div class="links"><a href="'+esc(r.html_url)+'" target="_blank" rel="noreferrer">Source code ↗</a>'+(demos[r.name]?'<a href="'+demos[r.name]+'" target="_blank" rel="noreferrer">Live demo ↗</a>':'')+'</div></article>').join('')||'<article class="card"><p>No public repositories found.</p></article>';
+   if(status)status.textContent='✓ GitHub data loaded · '+repos.length+' repositories · '+new Date().toLocaleString('en-IN');
+  }catch(e){
+   const msg=e.name==='AbortError'?'GitHub API timed out. Try again.':e.message;
+   if(status)status.textContent='GitHub data could not load: '+msg;
+   if(ranking)ranking.innerHTML='<article class="card"><h3>GitHub data unavailable</h3><p>'+esc(msg)+'</p><a href="https://github.com/'+username+'?tab=repositories" target="_blank" rel="noreferrer">Open public repositories ↗</a></article>';
+   console.error('GitHub Signal:',e);
+  }finally{clearTimeout(timer);if(button){button.disabled=false;button.textContent='↻ Refresh GitHub stats'}}
+ }
+ window.addEventListener('load',function(){
+  const old=$('#refresh-github');
+  if(old){const fresh=old.cloneNode(true);old.replaceWith(fresh);fresh.addEventListener('click',load)}
+  load();
+ });
+})();
+</script>
+</body></html>
