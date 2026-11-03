@@ -1,4 +1,4 @@
-# Nitesh Kumar | 3D Universe Portfolio
+# Nitesh Kumar | 3D Codlytic Portfolio
 
 An interactive 3D portfolio built with Three.js, featuring a starfield, clickable planets, skills, featured projects, live GitHub profile statistics, and contact links.
 
@@ -6,7 +6,7 @@ An interactive 3D portfolio built with Three.js, featuring a starfield, clickabl
 
 Enable GitHub Pages from **Settings → Pages → Deploy from a branch → main → /(root)**. The site will then be available at:
 
-https://nitesh-datascience.github.io/universe-portfolio/
+https://nitesh-datascience.github.io/Codlytic-portfolio/
 
 ## Run locally
 
