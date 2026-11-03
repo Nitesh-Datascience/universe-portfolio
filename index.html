@@ -200,7 +200,8 @@ document.querySelectorAll('.fallback-planet').forEach(button=>button.addEventLis
 (function(){
  const username='Nitesh-Datascience';
  const demos={'care-transition-efficiency-analytics':'https://care-transition-efficiency-analytics-knfy8ljtaxyn8ti74zy5ng.streamlit.app/','Customer_churn_Prediction':'https://customerchurnprediction-fkpbjib3muyvrhmgchkurb.streamlit.app/','EduPro_Project':'https://eduproproject-jkoe6q6tctk5xafa6ggogf.streamlit.app/','Financial_Fraud_Detection':'https://financialfrauddetection-6geni2xkrt3dc8ry2infsf.streamlit.app/'};
- const featured=['EduPro_Project','Customer_churn_Prediction','Financial_Fraud_Detection','care-transition-efficiency-analytics','FORESIGHT_NorthBay_Project','Nitesh-Tree-Portfolio','3D-Sketch-Portfolio','CodeVenjar','Happy-Diwali'];
+ const featured=['EduPro_Project','Customer_churn_Prediction','Financial_Fraud_Detection','care-transition-efficiency-analytics','FORESIGHT_NorthBay_Project','Nitesh-Tree-Portfolio','CodeVenjar','Happy-Diwali','Birthday_Surprise_Project'];
+ const excludedProjects=new Set(['3D-Sketch-Portfolio','Apple_stock_data_assignment']);
  const $=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-IN');
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  async function load(){
